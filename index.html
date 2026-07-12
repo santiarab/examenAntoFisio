@@ -1421,7 +1421,26 @@
       }
 
       function start(items) {
-        state.run = shuffle(items);
+        state.run = shuffle(items).map(origQ => {
+          const q = { ...origQ, options: shuffle(origQ.options) };
+          const correctText = origQ.options.find(o => o.key === origQ.answer.key)?.text || origQ.answer.text;
+          
+          q.options = q.options.map((o, idx) => ({
+            key: String.fromCharCode(65 + idx),
+            text: o.text
+          }));
+          
+          const newCorrectOpt = q.options.find(o => o.text === correctText);
+          const newCorrectKey = newCorrectOpt ? newCorrectOpt.key : 'A';
+          
+          q.answer = {
+            ...origQ.answer,
+            key: newCorrectKey
+          };
+          
+          return q;
+        });
+        
         state.index = 0;
         state.right = 0;
         state.wrong = 0;
