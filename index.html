@@ -1060,7 +1060,7 @@
       <div class="eyebrow"><i></i> estudio activo</div>
       <button id="themeToggle" class="theme-toggle" type="button" aria-label="Activar modo oscuro">🌙 Oscuro</button>
       <h1>Examen Interactivo</h1>
-      <p class="subtitle">Practicá con el compilado integrado de Anatomía (290 preguntas) y Fisiología (205 preguntas).</p>
+      <p class="subtitle">Practicá con el compilado integrado de Anatomía y Fisiología.</p>
     </header>
 
     <section id="loading" class="card" aria-live="polite">
@@ -1135,6 +1135,34 @@
           <div class="section-title">3. Practicar por Tema Específico</div>
           <div id="topicsContainer" class="topics-container">
             <!-- Topics rendered here dynamically -->
+          </div>
+        </section>
+
+        <!-- Section 4: Downloads Section -->
+        <section class="home-section">
+          <div class="section-title">4. Descargar Compilados PDF</div>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; width: 100%;">
+            <a href="Compilado-Preguntas-Anatomia.pdf" target="_blank" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; text-decoration: none; transition: all 0.2s ease; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 1.5rem; color: #0077B6;">📄</div>
+                <div style="display: flex; flex-direction: column;">
+                  <strong style="color: var(--text-primary); font-size: 0.95rem;">Compilado Anatomía</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">Descargar PDF (316 preguntas)</span>
+                </div>
+              </div>
+              <div style="font-size: 1.2rem; color: var(--text-secondary);">↓</div>
+            </a>
+            
+            <a href="Compilado-Preguntas-Fisiologia.pdf" target="_blank" style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; text-decoration: none; transition: all 0.2s ease; box-shadow: var(--shadow-sm);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 1.5rem; color: #0F4C5C;">📄</div>
+                <div style="display: flex; flex-direction: column;">
+                  <strong style="color: var(--text-primary); font-size: 0.95rem;">Compilado Fisiología</strong>
+                  <span style="font-size: 0.75rem; color: var(--text-secondary);">Descargar PDF (625 preguntas)</span>
+                </div>
+              </div>
+              <div style="font-size: 1.2rem; color: var(--text-secondary);">↓</div>
+            </a>
           </div>
         </section>
       </div>
