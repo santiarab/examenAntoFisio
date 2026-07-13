@@ -1715,6 +1715,19 @@
         }
         saveWrongIds();
         
+        try {
+          const answersLog = JSON.parse(localStorage.getItem('compilado-answers-log') || '[]');
+          answersLog.push({
+            qId: qId,
+            correct: correct,
+            subject: q.subject,
+            topic: q.topic,
+            date: Date.now()
+          });
+          if (answersLog.length > 2000) answersLog.shift();
+          localStorage.setItem('compilado-answers-log', JSON.stringify(answersLog));
+        } catch (_) {}
+        
         const feedback = $('#feedback');
         feedback.className = `feedback show ${correct ? 'ok' : 'no'}`;
         feedback.innerHTML = `<strong>${correct ? '¡Correcta!' : `La correcta era la ${q.answer.key}.`}</strong><br/>${explanation(q)}`;
@@ -1906,16 +1919,20 @@
           history = JSON.parse(localStorage.getItem('compilado-history') || '[]');
         } catch (_) {}
         
-        if (history.length === 0) {
+        let answersLog = [];
+        try {
+          answersLog = JSON.parse(localStorage.getItem('compilado-answers-log') || '[]');
+        } catch (_) {}
+        
+        if (answersLog.length === 0) {
           statsSection.style.display = 'none';
           return;
         }
         
         statsSection.style.display = 'block';
         
-        // 1. General Metrics
-        const totalExams = history.length;
-        let totalQuestions = 0;
+        // 1. General Metrics based on answersLog
+        const totalQuestions = answersLog.length;
         let totalRight = 0;
         
         // Subject metrics
@@ -1923,33 +1940,26 @@
         let physRight = 0, physTotal = 0;
         
         // Subtopic breakdown
-        // Key: "Subject_Topic" -> { right: X, total: Y }
         const topicMap = {};
         
-        history.forEach(exam => {
-          totalQuestions += exam.total;
-          totalRight += exam.right;
+        answersLog.forEach(ans => {
+          const isCorrect = ans.correct;
+          if (isCorrect) totalRight++;
           
-          if (exam.subject === 'Anatomía') {
-            anatoRight += exam.right;
-            anatoTotal += exam.total;
-          } else if (exam.subject === 'Fisiología') {
-            physRight += exam.right;
-            physTotal += exam.total;
+          if (ans.subject === 'Anatomía') {
+            anatoTotal++;
+            if (isCorrect) anatoRight++;
+          } else if (ans.subject === 'Fisiología') {
+            physTotal++;
+            if (isCorrect) physRight++;
           }
           
-          exam.questions.forEach(q => {
-            const subj = q.subject || exam.subject; // fallback
-            const topic = q.topic || 'General';
-            const isCorrect = q.userAnswer === q.answer.key;
-            
-            const key = `${subj}_${topic}`;
-            if (!topicMap[key]) {
-              topicMap[key] = { right: 0, total: 0, topic: topic, subject: subj };
-            }
-            topicMap[key].total++;
-            if (isCorrect) topicMap[key].right++;
-          });
+          const key = `${ans.subject}_${ans.topic}`;
+          if (!topicMap[key]) {
+            topicMap[key] = { right: 0, total: 0, topic: ans.topic, subject: ans.subject };
+          }
+          topicMap[key].total++;
+          if (isCorrect) topicMap[key].right++;
         });
         
         const globalPercent = Math.round((totalRight / totalQuestions) * 100) || 0;
@@ -1958,25 +1968,29 @@
         
         // Update general stats counters in UI
         $('#statGlobal').textContent = `${globalPercent}%`;
-        $('#statExams').textContent = totalExams;
+        $('#statExams').textContent = history.length;
         $('#statQuestions').textContent = totalQuestions;
         
         // 2. Render Evolution Bars (last 10 exams, oldest to newest)
         const evolutionContainer = $('#evolutionContainer');
         const lastExams = [...history].slice(0, 10).reverse(); // last 10 exams, ordered chronologically
         
-        evolutionContainer.innerHTML = lastExams.map((exam, idx) => {
-          const isPass = exam.percent >= 60;
-          return `
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%;">
-              <div style="font-size: 0.65rem; font-weight:700; color: var(--text-secondary);">${exam.percent}%</div>
-              <div style="width: 16px; height: 50px; background: var(--border-color); border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden;">
-                <div style="width: 100%; height: ${exam.percent}%; background: ${isPass ? 'var(--color-success)' : 'var(--color-danger)'}; border-radius: 2px;"></div>
+        if (lastExams.length > 0) {
+          evolutionContainer.innerHTML = lastExams.map((exam, idx) => {
+            const isPass = exam.percent >= 60;
+            return `
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%;">
+                <div style="font-size: 0.65rem; font-weight:700; color: var(--text-secondary);">${exam.percent}%</div>
+                <div style="width: 16px; height: 50px; background: var(--border-color); border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden;">
+                  <div style="width: 100%; height: ${exam.percent}%; background: ${isPass ? 'var(--color-success)' : 'var(--color-danger)'}; border-radius: 2px;"></div>
+                </div>
+                <div style="font-size: 0.6rem; color: var(--text-secondary); white-space: nowrap; max-width: 32px; overflow: hidden; text-overflow: ellipsis;" title="${exam.subject} - ${exam.mode}">#${lastExams.length - idx}</div>
               </div>
-              <div style="font-size: 0.6rem; color: var(--text-secondary); white-space: nowrap; max-width: 32px; overflow: hidden; text-overflow: ellipsis;" title="${exam.subject} - ${exam.mode}">#${lastExams.length - idx}</div>
-            </div>
-          `;
-        }).join('');
+            `;
+          }).join('');
+        } else {
+          evolutionContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary); font-style:italic; text-align:center; width:100%; padding-top:20px;">Completá tu primer examen para ver el gráfico de evolución.</div>`;
+        }
         
         // 3. Render Subject Bars
         const subjectsContainer = $('#statsSubjectsContainer');
