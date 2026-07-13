@@ -1280,9 +1280,14 @@
 
       const $ = (s) => document.querySelector(s);
       
+      let initialWrongIds = [];
+      try {
+        initialWrongIds = JSON.parse(localStorage.getItem('compilado-wrong-ids') || '[]');
+      } catch (_) {}
+
       const state = {
         questions: [],
-        wrongIds: new Set(), // Store wrong question identifiers like 'subject_number'
+        wrongIds: new Set(initialWrongIds), // Store wrong question identifiers like 'subject_number'
         run: [],
         index: 0,
         right: 0,
@@ -1290,6 +1295,12 @@
         answered: false,
         activeSubject: 'Anatomía' // 'Anatomía', 'Fisiología', 'Ambas'
       };
+
+      function saveWrongIds() {
+        try {
+          localStorage.setItem('compilado-wrong-ids', JSON.stringify([...state.wrongIds]));
+        } catch (_) {}
+      }
 
       // Theme toggle logic
       function applyTheme(theme) {
@@ -1652,6 +1663,7 @@
           state.wrong++;
           state.wrongIds.add(qId);
         }
+        saveWrongIds();
         
         const feedback = $('#feedback');
         feedback.className = `feedback show ${correct ? 'ok' : 'no'}`;
