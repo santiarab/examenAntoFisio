@@ -1079,15 +1079,15 @@
           <div class="subject-tabs">
             <button class="subject-tab active" data-subject="Anatomía">
               <strong>Anatomía</strong>
-              <small>290 preguntas</small>
+              <small id="anatomyTabCount">290 preguntas</small>
             </button>
             <button class="subject-tab" data-subject="Fisiología">
               <strong>Fisiología</strong>
-              <small>205 preguntas</small>
+              <small id="physiologyTabCount">546 preguntas</small>
             </button>
             <button class="subject-tab" data-subject="Ambas">
               <strong>Ambas (Mix)</strong>
-              <small>495 preguntas</small>
+              <small id="bothTabCount">836 preguntas</small>
             </button>
           </div>
         </section>
@@ -1358,16 +1358,24 @@
       function updateHomeView() {
         const subj = state.activeSubject;
         
+        const totalAnatomy = state.questions.filter(q => q.subject === 'Anatomía').length;
+        const totalPhysiology = state.questions.filter(q => q.subject === 'Fisiología').length;
+        const totalBoth = state.questions.length;
+        
+        $('#anatomyTabCount').textContent = `${totalAnatomy} preguntas`;
+        $('#physiologyTabCount').textContent = `${totalPhysiology} preguntas`;
+        $('#bothTabCount').textContent = `${totalBoth} preguntas`;
+        
         // Update helper text in mode buttons
         if (subj === 'Anatomía') {
           $('#randomModeText').textContent = '20 preguntas';
-          $('#allModeText').textContent = 'Todas las preguntas (290)';
+          $('#allModeText').textContent = `Todas las preguntas (${totalAnatomy})`;
         } else if (subj === 'Fisiología') {
           $('#randomModeText').textContent = '20 preguntas';
-          $('#allModeText').textContent = 'Todas las preguntas (205)';
+          $('#allModeText').textContent = `Todas las preguntas (${totalPhysiology})`;
         } else {
           $('#randomModeText').textContent = '20 preguntas mezcladas';
-          $('#allModeText').textContent = 'Todas las preguntas (495)';
+          $('#allModeText').textContent = `Todas las preguntas (${totalBoth})`;
         }
 
         // Render topics list depending on active subject
